@@ -4,12 +4,18 @@
   dnf: name=nginx state=present
   become: yes
 
+- stat: path=/usr/share/nginx/learn.nilenso.com.access.log
+  register: accesslogp
 - name: Create access log file
   file: path=/usr/share/nginx/learn.nilenso.com.access.log state=touch owner=root group=root mode=0600
+  when: not accesslogp.stat.exists
   become: yes
 
+- stat: path=/usr/share/nginx/learn.nilenso.com.error.log
+  register: errorlogp
 - name: Create error log file
   file: path=/usr/share/nginx/learn.nilenso.com.error.log state=touch owner=root group=root mode=0600
+  when: not errorlogp.stat.exists
   become: yes
 
 - name: Configure Nginx
