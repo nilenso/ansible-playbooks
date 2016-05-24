@@ -2,7 +2,7 @@
 Description=Slack invite service
            
 [Service]
-Type=forking
+Type=simple
 PIDFile=/var/run/{{ slackin_service_id }}.pid
 ExecStart=/app/slackin/node_modules/slackin/bin/slackin {{ slackin_service_team_id }} {{ slackin_service_api_token }}
 ExecStop=/usr/bin/kill -15 $(cat /var/run/{{ slackin_service_id }}.pid)
