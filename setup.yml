@@ -8,3 +8,4 @@
     - nodejs
     - slackin
     - slackin-service
+    - { role: sync-zip-s3-bucket, zip_url: "{{ design_nilenso_com_zip_url }}", s3_bucket: "{{ design_nilenso_com_s3_bucket }}", source_path_in_zip: "{{ design_nilenso_com_source_path }}" }

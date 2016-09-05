@@ -1,0 +1,37 @@
+---
+
+- name: Install AWS CLI tools
+  pip: name=awscli
+  become: yes
+
+- name: Create temporary directory
+  command: mktemp -d
+  register: sync_zip_s3_bucket_temp_dir
+
+- name: Get zipfile
+  get_url: url={{ zip_url }} dest="{{ sync_zip_s3_bucket_temp_dir.stdout }}/zipfile.zip"
+
+- name: Create temporary directory for unzip output
+  file: path="{{ sync_zip_s3_bucket_temp_dir.stdout }}/zipfile_dir" state=directory
+
+- name: Unzip zipfile
+  unarchive: src="{{ sync_zip_s3_bucket_temp_dir.stdout }}/zipfile.zip"
+             dest="{{ sync_zip_s3_bucket_temp_dir.stdout }}/zipfile_dir"
+             copy=no
+
+- name: Create AWS credentials directory
+  file: path="{{ ansible_env.HOME }}/.aws" state=directory
+
+- name: Configure AWS credentials for s3cmd
+  template: src=aws_credentials dest="{{ ansible_env.HOME }}/.aws/credentials"
+
+- name: Upload to S3
+  command: aws s3 sync --acl public-read "{{ sync_zip_s3_bucket_temp_dir.stdout }}/zipfile_dir/{{ source_path_in_zip }}" s3://{{ s3_bucket }}/
+
+- name: Delete temporary files
+  file: path="{{ ansible_env.HOME }}/.aws" state=absent
+  file: path={{ sync_zip_s3_bucket_temp_dir.stdout }} state=absent
+
+- name: Remove AWS CLI tools
+  pip: name=awscli state=absent
+  become: yes
